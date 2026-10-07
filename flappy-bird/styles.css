@@ -1,0 +1,29 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { overflow: hidden; background: #87CEEB; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Courier New', monospace; }
+canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
+
+.home-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(255,255,255,0.9);
+  color: #2563eb;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border: 2px solid #60a5fa;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.15s ease;
+}
+
+.home-btn:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
