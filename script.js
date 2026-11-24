@@ -87,3 +87,20 @@ function renderGames() {
 }
 
 document.addEventListener('DOMContentLoaded', renderGames);
+// What changed, newest first. One line each, so the homepage says what is new
+// without anyone having to read a diff or open GitHub.
+const updates = [
+  { date: '24 Nov 2026', text: 'Tetris: rotation works, and the start screen no longer spills into the sidebar.' }
+];
+
+function renderLatest() {
+  const list = document.getElementById('latest-list');
+  if (!list) return;
+  updates.forEach(item => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="when">${item.date}</span><span class="what">${item.text}</span>`;
+    list.appendChild(li);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', renderLatest);
