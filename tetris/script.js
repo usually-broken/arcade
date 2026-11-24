@@ -94,7 +94,11 @@ function rotateMatrix(m) {
 
 function getMatrix(piece, rot) {
   let m = piece.type !== undefined ? PIECES[piece.type].matrix : PIECES[piece].matrix;
-  for (let i = 0; i < rot; i++) m = rotateMatrix(m);
+  // No rotation passed means "the way it is standing now", so a drawing call that
+  // only knows the piece still shows it turned. Without this, the shape turns in
+  // the rules and stays put on screen — a rotate key that looks dead.
+  const turns = rot === undefined ? ((piece.type !== undefined ? piece.rotation : 0) || 0) : rot;
+  for (let i = 0; i < turns; i++) m = rotateMatrix(m);
   return m;
 }
 
@@ -134,7 +138,9 @@ function movePiece(dx, dy) {
 function rotatePiece() {
   if (!current || gameState !== 'playing') return;
   const newRot = (current.rotation + 1) % 4;
-  const m = getMatrix({ type: current.type, rotation: newRot });
+  // The rotation has to be handed to getMatrix, or it returns the piece in the
+  // shape it already had and every press looks like nothing happened.
+  const m = getMatrix(current.type, newRot);
   const kicks = [[0,0],[-1,0],[1,0],[0,-1],[-1,-1],[1,-1]];
   for (const [kx, ky] of kicks) {
     if (!collides(m, current.x + kx, current.y + ky)) {
@@ -336,11 +342,36 @@ function draw() {
   ctx.textAlign = 'left';
   ctx.fillText('NEXT', SIDE_X, 40);
 
+  // A box around the preview, with the piece centred in it. Floating free, the
+  // shape read as a stray block rather than a preview of what is coming.
+  const boxX = SIDE_X;
+  const boxY = 52;
+  const boxW = 96;
+  const boxH = 96;
+  ctx.strokeStyle = '#dbeafe';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX, boxY, boxW, boxH);
+
   if (nextType !== undefined) {
     const m = PIECES[nextType].matrix;
-    const s = 16;
-    const ox = SIDE_X;
-    const oy = 50;
+    const s = 18;
+    // Only the filled extent decides the centring, or a piece with empty rows
+    // in its matrix sits low and left inside the box.
+    let minR = m.length, maxR = -1, minC = m.length, maxC = -1;
+    for (let r = 0; r < m.length; r++) {
+      for (let c = 0; c < m[r].length; c++) {
+        if (m[r][c]) {
+          if (r < minR) minR = r;
+          if (r > maxR) maxR = r;
+          if (c < minC) minC = c;
+          if (c > maxC) maxC = c;
+        }
+      }
+    }
+    const w = (maxC - minC + 1) * s;
+    const h = (maxR - minR + 1) * s;
+    const ox = boxX + (boxW - w) / 2 - minC * s;
+    const oy = boxY + (boxH - h) / 2 - minR * s;
     for (let r = 0; r < m.length; r++) {
       for (let c = 0; c < m[r].length; c++) {
         if (m[r][c]) {
@@ -376,28 +407,34 @@ function draw() {
     ctx.fillStyle = '#2563eb';
     ctx.font = 'bold 42px Courier New';
     ctx.textAlign = 'center';
-    ctx.fillText('PAUSED', GAME_W / 2, GAME_H * 0.38);
+    ctx.fillText('PAUSED', BOARD_X + (COLS * CELL) / 2, GAME_H * 0.38);
     ctx.fillStyle = '#1e293b';
     ctx.font = '18px Courier New';
-    ctx.fillText('Resuming in ' + (3 - Math.floor(pauseTimer / 60)) + 's...', GAME_W / 2, GAME_H * 0.5);
+    ctx.fillText('Resuming in ' + (3 - Math.floor(pauseTimer / 60)) + 's...', BOARD_X + (COLS * CELL) / 2, GAME_H * 0.5);
     ctx.fillStyle = '#64748b';
     ctx.font = '14px Courier New';
-    ctx.fillText('Press Q to resume early', GAME_W / 2, GAME_H * 0.57);
+    ctx.fillText('Press Q to resume early', BOARD_X + (COLS * CELL) / 2, GAME_H * 0.57);
   }
 
   if (gameState === 'start') {
+    // Centred on the board, not the canvas: the sidebar takes the right third, so
+    // canvas-centred text spilled out of the playfield and into the stats.
+    const cx = BOARD_X + (COLS * CELL) / 2;
     ctx.fillStyle = '#2563eb';
     ctx.font = 'bold 36px Courier New';
     ctx.textAlign = 'center';
-    ctx.fillText('TETRIS', GAME_W / 2, GAME_H * 0.35);
+    ctx.fillText('TETRIS', cx, GAME_H * 0.35);
     ctx.fillStyle = '#1e293b';
     ctx.font = '16px Courier New';
-    ctx.fillText('SPACE to start', GAME_W / 2, GAME_H * 0.45);
-    ctx.font = '13px Courier New';
-    ctx.fillText('← → A D to move    ↑ W to rotate    ↓ S soft drop    SPACE hard drop', GAME_W / 2, GAME_H * 0.55);
+    ctx.fillText('SPACE to start', cx, GAME_H * 0.45);
+    ctx.font = '11px Courier New';
+    ctx.fillText('← → A D  move', cx, GAME_H * 0.54);
+    ctx.fillText('↑ W  rotate    ↓ S  soft drop', cx, GAME_H * 0.58);
+    ctx.fillText('SPACE  hard drop', cx, GAME_H * 0.62);
     ctx.fillStyle = '#64748b';
-    ctx.font = '12px Courier New';
-    ctx.fillText('Clear lines. Build levels. Speed increases. Survive.', GAME_W / 2, GAME_H * 0.65);
+    ctx.font = '11px Courier New';
+    ctx.fillText('Clear lines. Build levels.', cx, GAME_H * 0.7);
+    ctx.fillText('Speed increases. Survive.', cx, GAME_H * 0.735);
   }
 
   if (gameState === 'over') {
@@ -406,12 +443,12 @@ function draw() {
     ctx.fillStyle = '#2563eb';
     ctx.font = 'bold 36px Courier New';
     ctx.textAlign = 'center';
-    ctx.fillText('GAME OVER', GAME_W / 2, GAME_H * 0.35);
+    ctx.fillText('GAME OVER', BOARD_X + (COLS * CELL) / 2, GAME_H * 0.35);
     ctx.fillStyle = '#1e293b';
     ctx.font = '18px Courier New';
-    ctx.fillText('Score: ' + score, GAME_W / 2, GAME_H * 0.45);
+    ctx.fillText('Score: ' + score, BOARD_X + (COLS * CELL) / 2, GAME_H * 0.45);
     ctx.font = '14px Courier New';
-    ctx.fillText('SPACE to restart', GAME_W / 2, GAME_H * 0.55);
+    ctx.fillText('SPACE to restart', BOARD_X + (COLS * CELL) / 2, GAME_H * 0.55);
   }
 }
 
