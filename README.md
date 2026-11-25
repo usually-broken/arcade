@@ -12,6 +12,7 @@ A collection of browser games written in vanilla HTML, CSS, and JavaScript. Each
 - Space Invaders — defend Earth from enemy waves. Controls: WASD / ARROWS + SPACE
 - Tetris — rotate and drop tetrominoes. Clear lines. Controls: WASD / ARROWS + SPACE
 - Traffic Dodge — top-down car dodger. Steer left and right, dodge car doors, tyres, and debris. 3 hits and you are out. Count dodges for score. Controls: WASD / ARROWS
+- Battle Tank — top-down tank battle. Fifty-one tanks arrive in waves across an arena of breakable walls. Controls: WASD / ARROWS + SPACE
 
 Looking for testers — our name is usually-broken, so if you find bugs you're just confirming what we already knew. Perfectly usually-broken. See CONTRIBUTING.md.
 

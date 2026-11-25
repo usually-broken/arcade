@@ -62,6 +62,13 @@ const games = [
     controls: 'WASD / ARROWS',
     url: 'traffic/index.html'
   },
+  {
+    id: 'tank',
+    name: 'Battle Tank',
+    description: 'Top-down tank battle. Drive and turn the hull, fire where you face. Fifty-one tanks arrive in waves and the walls come down as you shoot them.',
+    controls: 'WASD / ARROWS + SPACE',
+    url: 'tank/index.html'
+  },
 ];
 
 function renderGames() {
@@ -90,6 +97,7 @@ document.addEventListener('DOMContentLoaded', renderGames);
 // What changed, newest first. One line each, so the homepage says what is new
 // without anyone having to read a diff or open GitHub.
 const updates = [
+  { date: '25 Nov 2026', text: 'New game: Battle Tank. Fifty-one tanks in waves, and walls you can shoot down.' },
   { date: '24 Nov 2026', text: 'Tetris: rotation works, and the start screen no longer spills into the sidebar.' }
 ];
 
